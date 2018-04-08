@@ -1,0 +1,12 @@
+*~
+*.back
+*.orig
+.nfs*
+*.lock
+vendor
+.bundle
+.*.swo
+*.swp
+.*.swp
+.vagrant
+.vagrant.d
