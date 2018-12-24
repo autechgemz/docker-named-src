@@ -2,17 +2,16 @@ FROM alpine:latest
 
 LABEL maintainer "Kenji Tsumaki <autechgemz@gmail.com>"
 
-ARG BIND_VERSION="9.11.3"
-
-ENV BIND_SITE https://ftp.isc.org/isc/bind9
-ENV BIND_BIN bind-${BIND_VERSION}.tar.gz
-ENV BIND_GET ${BIND_SITE}/${BIND_VERSION}/${BIND_BIN}
+ARG BIND_VERSION="9.11.5-P1"
+ARG BIND_SITE=https://ftp.isc.org/isc/bind9
+ARG BIND_BIN=bind-${BIND_VERSION}.tar.gz
+ARG BIND_GET=${BIND_SITE}/${BIND_VERSION}/${BIND_BIN}
 
 RUN addgroup -S named \
- && adduser -S -D -H -h /etc/named -s /sbin/nologin -G named -g named named \
+ && adduser -S -D -H -h /usr/local/etc/named -s /sbin/nologin -G named -g named named \
  && apk upgrade --update --available \
  && apk add --no-cache \
-    runit \
+    tini \
     tzdata \
     rsyslog \
     linux-headers \
@@ -38,8 +37,8 @@ RUN tar zxvf ${BIND_BIN}
 WORKDIR /tmp/bind-${BIND_VERSION}
 
 RUN ./configure \
-    --prefix=/usr \
-    --sysconfdir=/etc/named \
+    --prefix=/usr/local \
+    --sysconfdir=/usr/local/etc/named \
     --localstatedir=/var \
     --with-openssl=/usr \
     --enable-linux-caps \
@@ -51,8 +50,8 @@ RUN ./configure \
     --enable-static \
     --with-libtool \
     --with-randomdev=/dev/random \
-    --mandir=/usr/share/man \
-    --infodir=/usr/share/info \
+    --mandir=/usr/local/share/man \
+    --infodir=/usr/local/share/info \
  && make \
  && make install
 
@@ -63,14 +62,15 @@ RUN rm -rf bind-${BIND_VERSION} && \
 
 WORKDIR /
 
-COPY etc/named /etc/named
+COPY etc/named /usr/local/etc/named
 COPY etc/rsyslog.conf /etc/rsyslog.conf
 
-COPY service /service
-RUN chmod 755 /service/*/run
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
 
 EXPOSE 53/udp 53/tcp
 
-VOLUME ["/etc/named"]
+VOLUME ["/usr/local/etc/named"]
 
-ENTRYPOINT ["runsvdir", "-P", "/service/"]
+ENTRYPOINT ["tini", "--"]
+CMD ["/entrypoint.sh"]
