@@ -5,7 +5,7 @@ BIND_ROOT=/usr/local/etc/named
 
 BIND_RNDC_KEY=$BIND_ROOT/rndc.key
 if [ ! -f $BIND_RNDC_KEY ]; then
-  rndc-confgen -b 512 -r /dev/urandom -a -c $BIND_RNDC_KEY > /dev/null 2>&1
+  rndc-confgen -b 512 -a -c $BIND_RNDC_KEY > /dev/null 2>&1
   chmod 0440 $BIND_RNDC_KEY
   chown root.named $BIND_RNDC_KEY
 fi
