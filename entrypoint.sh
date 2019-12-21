@@ -23,8 +23,8 @@ fi
 find ${BIND_ROOT} -type d -exec chmod 0755 {} \;
 find ${BIND_ROOT} -type f -exec chmod 0644 {} \;
 
-find ${BIND_ROOT} -type d -exec chown named.named {} \;
-find ${BIND_ROOT} -type f -exec chown named.named {} \;
+find ${BIND_ROOT} -type d -exec chown root.named {} \;
+find ${BIND_ROOT} -type f -exec chown root.named {} \;
 
 /usr/sbin/rsyslogd &&
 exec /usr/local/sbin/named -u named -f
