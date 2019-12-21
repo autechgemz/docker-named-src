@@ -28,9 +28,8 @@ RUN addgroup -S named \
     ca-certificates \
     geoip-dev \
     python3 \
+    py3-ply \
  && update-ca-certificates \
- && pip3 install --upgrade pip \
- && pip3 install ply
 ADD $BIND_GET /tmp/${BIND_BIN}
 WORKDIR /tmp
 RUN tar zxvf ${BIND_BIN} 
