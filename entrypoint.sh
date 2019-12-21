@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -e
 
-BIND_ROOT=/usr/local/etc/named
+BIND_ROOT=/etc/named
 
 BIND_RNDC_KEY=$BIND_ROOT/rndc.key
 if [ ! -f $BIND_RNDC_KEY ]; then
