@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+set -e
+
+BIND_ROOT=/chroot
+
+BIND_RNDC_KEY=${BIND_ROOT}/etc/named/rndc.key
+if [ ! -f $BIND_RNDC_KEY ]; then
+  rndc-confgen -b 512 -a -c $BIND_RNDC_KEY > /dev/null 2>&1
+  chmod 0440 $BIND_RNDC_KEY
+  chown root.${BIND_USER} $BIND_RNDC_KEY
+fi
+
+BIND_KEYS=${BIND_ROOT}/etc/named/bind.root.keys
+if [ ! -f $BIND_KEYS ]; then
+  wget -q -O $BIND_KEYS https://downloads.isc.org/isc/bind9/keys/9.11/bind.keys.v9_11
+fi
+
+for view_dirs in external internal ; do
+  find ${BIND_ROOT}/var/named/${view_dirs} -type f -name root.cache -exec false {} + \
+  && wget -q -O ${BIND_ROOT}/var/named/${view_dirs} https://www.internic.net/domain/named.root
+done
+
+for bind_dirs in etc var ; do
+  find "${BIND_ROOT}/${bind_dirs}" -type d -exec chmod 0750 {} \;
+  find "${BIND_ROOT}/${bind_dirs}" -type f -exec chmod 0640 {} \;
+  find "${BIND_ROOT}/${bind_dirs}" -type d -exec chown ${BIND_USER}.${BIND_USER} {} \;
+  find "${BIND_ROOT}/${bind_dirs}" -type f -exec chown ${BIND_USER}.${BIND_USER} {} \;
+done
+
+exec ${BIND_ROOT}/sbin/named -u ${BIND_USER} -t ${BIND_ROOT} -c /etc/named/named.conf -f

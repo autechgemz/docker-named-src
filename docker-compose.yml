@@ -2,13 +2,12 @@ version: "3"
 services:
   named:
     build: .
-    image: autechgemz/named-src
+    image: local/named-src
+    container_name: named
     network_mode: bridge
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-    environment:
-      TZ: "Asia/Tokyo"
     restart: always
     cap_add:
       - DAC_READ_SEARCH
